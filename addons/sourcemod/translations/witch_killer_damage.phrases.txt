@@ -1,0 +1,38 @@
+"Phrases"
+{
+	"BRACKET_START"
+	{
+		"en"			"┌ "
+	}
+
+	"BRACKET_MIDDLE"
+	{
+		"en"			"├ "
+	}
+
+	"BRACKET_END"
+	{
+		"en"			"└ "
+	}
+
+	"TAG"
+	{
+		"en"			"<{green}Witch Killer Damage{default}>"
+	}
+
+	"TANK_KILLER"
+	{
+		"en"			"Tank killed the witch"
+	}
+
+	"SURVIVOR_KILLER"
+	{
+		"#format"		"{1:N},{2:d},{3:.0f}"
+		"en"			"{blue}{1}{default} {2} dmg [{3}%%]"
+	}
+
+	"UNKNOW_KILLER"
+	{
+		"en"			"The witch died under mysterious circumstances"
+	}
+}
