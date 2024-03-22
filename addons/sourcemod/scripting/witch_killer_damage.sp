@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name = "WitchKillerDamage",
 	author = "TouchMe",
 	description = "Print damage to Witch",
-	version = "build0001",
+	version = "build0002",
 	url = "https://github.com/TouchMe-Inc/l4d2_witch_killer_damage"
 }
 
@@ -139,50 +139,10 @@ public void Event_WitchDeath(Event event, const char[] name, bool bDontBroadcast
 		return;
 	}
 
-	if (IsClientSurvivor(iKiller))
-	{
-		int iMaxHelath = RoundToFloor(GetConVarFloat(g_cvWitchHealth));
-
-		if (g_iTotalDamage < iMaxHelath)
-		{
-			g_iKillerDamage[iKiller] += (iMaxHelath - g_iTotalDamage);
-			g_iTotalDamage = iMaxHelath;
-		}
-
-		int iTotalPlayers = 0;
-		int[] iPlayers = new int[MaxClients];
-
-		for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer ++)
-		{
-			if (!IsClientInGame(iPlayer)
-			|| !IsClientSurvivor(iPlayer)
-			|| !g_iKillerDamage[iPlayer]) {
-				continue;
-			}
-
-			iPlayers[iTotalPlayers ++] = iPlayer;
-		}
-
-		if (!iTotalPlayers) {
-			return;
-		}
-
-		SortCustom1D(iPlayers, iTotalPlayers, SortDamage);
-
-		for (int iClient = 1; iClient <= MaxClients; iClient ++)
-		{
-			if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
-				continue;
-			}
-
-			PrintToChatDamage(iClient, iPlayers, iTotalPlayers);
-		}
-	}
-
 	/**
 	 * Tank Killed the Witch.
 	 */
-	else if (IsClientInfected(iKiller) && IsClientTank(iKiller))
+	if (IsClientInfected(iKiller) && IsClientTank(iKiller))
 	{
 		for (int iClient = 1; iClient <= MaxClients; iClient ++)
 		{
@@ -192,18 +152,48 @@ public void Event_WitchDeath(Event event, const char[] name, bool bDontBroadcast
 
 			PrintToChat(iClient, "%T%T", "TAG", iClient, "TANK_KILLER", iClient);
 		}
+
+		return;
 	}
 
-	else
+	else if (IsClientSurvivor(iKiller))
 	{
-		for (int iClient = 1; iClient <= MaxClients; iClient ++)
-		{
-			if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
-				continue;
-			}
+		int iMaxHelath = RoundToFloor(GetConVarFloat(g_cvWitchHealth));
 
-			PrintToChat(iClient, "%T%T", "TAG", iClient, "UNKNOW_KILLER", iClient);
+		if (g_iTotalDamage < iMaxHelath)
+		{
+			g_iKillerDamage[iKiller] += (iMaxHelath - g_iTotalDamage);
+			g_iTotalDamage = iMaxHelath;
 		}
+	}
+
+	int iTotalPlayers = 0;
+	int[] iPlayers = new int[MaxClients];
+
+	for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer ++)
+	{
+		if (!IsClientInGame(iPlayer)
+		|| !IsClientSurvivor(iPlayer)
+		|| !g_iKillerDamage[iPlayer]) {
+			continue;
+		}
+
+		iPlayers[iTotalPlayers ++] = iPlayer;
+	}
+
+	if (!iTotalPlayers) {
+		return;
+	}
+
+	SortCustom1D(iPlayers, iTotalPlayers, SortDamage);
+
+	for (int iClient = 1; iClient <= MaxClients; iClient ++)
+	{
+		if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
+			continue;
+		}
+
+		PrintToChatDamage(iClient, iPlayers, iTotalPlayers);
 	}
 }
 
