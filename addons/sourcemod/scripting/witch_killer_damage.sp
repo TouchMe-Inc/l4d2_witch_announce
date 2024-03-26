@@ -11,7 +11,7 @@ public Plugin myinfo =
 	name = "WitchKillerDamage",
 	author = "TouchMe",
 	description = "Print damage to Witch",
-	version = "build0002",
+	version = "build0001",
 	url = "https://github.com/TouchMe-Inc/l4d2_witch_killer_damage"
 }
 
@@ -201,6 +201,8 @@ void PrintToChatDamage(int iClient, const int[] iPlayers, int iTotalPlayers)
 {
 	CPrintToChat(iClient, "%T%T", "BRACKET_START", iClient, "TAG", iClient);
 
+	char sName[MAX_NAME_LENGTH];
+
 	for (int iItem = 0; iItem < iTotalPlayers; iItem ++)
 	{
 		int iPlayer = iPlayers[iItem];
@@ -210,10 +212,12 @@ void PrintToChatDamage(int iClient, const int[] iPlayers, int iTotalPlayers)
 			fDamageProcent = 100.0 * float(g_iKillerDamage[iPlayer]) / float(g_iTotalDamage);
 		}
 
+		GetClientNameFixed(iPlayer, sName, sizeof(sName), 18);
+
 		CPrintToChat(iClient, "%T%T",
 			(iItem + 1) == iTotalPlayers ? "BRACKET_END" : "BRACKET_MIDDLE", iClient,
 			"SURVIVOR_KILLER", iClient,
-			iPlayer,
+			sName,
 			g_iKillerDamage[iPlayer],
 			fDamageProcent
 		);
@@ -278,4 +282,18 @@ int GetClientClass(int iClient) {
 
 bool IsClientTank(int iClient) {
 	return (GetClientClass(iClient) == CLASS_TANK);
+}
+
+/**
+ *
+ */
+void GetClientNameFixed(int iClient, char[] name, int length, int iMaxSize)
+{
+	GetClientName(iClient, name, length);
+
+	if (strlen(name) > iMaxSize)
+	{
+		name[iMaxSize - 3] = name[iMaxSize - 2] = name[iMaxSize - 1] = '.';
+		name[iMaxSize] = '\0';
+	}
 }
