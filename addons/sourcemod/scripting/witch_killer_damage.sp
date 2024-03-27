@@ -10,7 +10,7 @@ public Plugin myinfo =
 {
 	name = "WitchKillerDamage",
 	author = "TouchMe",
-	description = "Print damage to Witch",
+	description = "Displays in chat the damage done to the witch",
 	version = "build0001",
 	url = "https://github.com/TouchMe-Inc/l4d2_witch_killer_damage"
 }
@@ -135,35 +135,34 @@ public void Event_WitchDeath(Event event, const char[] name, bool bDontBroadcast
 {
 	int iKiller = GetClientOfUserId(GetEventInt(event, "userid"));
 
-	if (!IsValidClient(iKiller) || !IsClientInGame(iKiller)) {
-		return;
-	}
-
-	/**
-	 * Tank Killed the Witch.
-	 */
-	if (IsClientInfected(iKiller) && IsClientTank(iKiller))
+	if (IsValidClient(iKiller) && IsClientInGame(iKiller))
 	{
-		for (int iClient = 1; iClient <= MaxClients; iClient ++)
+		/**
+		 * Tank Killed the Witch.
+		 */
+		if (IsClientInfected(iKiller) && IsClientTank(iKiller))
 		{
-			if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
-				continue;
+			for (int iClient = 1; iClient <= MaxClients; iClient ++)
+			{
+				if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
+					continue;
+				}
+
+				PrintToChat(iClient, "%T%T", "TAG", iClient, "TANK_KILLER", iClient);
 			}
 
-			PrintToChat(iClient, "%T%T", "TAG", iClient, "TANK_KILLER", iClient);
+			return;
 		}
 
-		return;
-	}
-
-	else if (IsClientSurvivor(iKiller))
-	{
-		int iMaxHelath = RoundToFloor(GetConVarFloat(g_cvWitchHealth));
-
-		if (g_iTotalDamage < iMaxHelath)
+		else if (IsClientSurvivor(iKiller))
 		{
-			g_iKillerDamage[iKiller] += (iMaxHelath - g_iTotalDamage);
-			g_iTotalDamage = iMaxHelath;
+			int iMaxHelath = RoundToFloor(GetConVarFloat(g_cvWitchHealth));
+
+			if (g_iTotalDamage < iMaxHelath)
+			{
+				g_iKillerDamage[iKiller] += (iMaxHelath - g_iTotalDamage);
+				g_iTotalDamage = iMaxHelath;
+			}
 		}
 	}
 
