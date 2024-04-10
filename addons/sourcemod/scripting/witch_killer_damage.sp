@@ -148,7 +148,7 @@ public void Event_WitchDeath(Event event, const char[] name, bool bDontBroadcast
 					continue;
 				}
 
-				PrintToChat(iClient, "%T%T", "TAG", iClient, "TANK_KILLER", iClient);
+				CPrintToChat(iClient, "%T%T", "TAG", iClient, "TANK_KILLER", iClient);
 			}
 
 			return;
