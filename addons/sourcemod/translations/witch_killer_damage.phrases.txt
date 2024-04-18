@@ -17,7 +17,13 @@
 
 	"TAG"
 	{
-		"en"			"<{green}Witch Killer Damage{default}>"
+		"en"			"<{green}Witch Killer Damage{default}> "
+	}
+
+	"INFO"
+	{
+		"#format"		"{1:d}"
+		"en"			"Damage dealt to witch #{1}:"
 	}
 
 	"TANK_KILLER"
@@ -27,7 +33,7 @@
 
 	"SURVIVOR_KILLER"
 	{
-		"#format"		"{1:s},{2:d},{3:.0f}"
-		"en"			"{blue}{1}{default} {2} dmg [{3}%%]"
+		"#format"		"{1:s},{2:3.d},{3:2.0f}"
+		"en"			"{default}{2} dmg [{3}%%] {blue}{1}"
 	}
 }
