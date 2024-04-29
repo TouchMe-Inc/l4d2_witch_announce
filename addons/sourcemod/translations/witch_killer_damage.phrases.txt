@@ -34,6 +34,6 @@
 	"SURVIVOR_KILLER"
 	{
 		"#format"		"{1:s},{2:3.d},{3:2.0f}"
-		"en"			"{default}{2} dmg [{3}%%] {blue}{1}"
+		"en"			"{default}{2} [{3}%%] {blue}{1}"
 	}
 }
