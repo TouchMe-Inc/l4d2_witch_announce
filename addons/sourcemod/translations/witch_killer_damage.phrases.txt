@@ -28,7 +28,8 @@
 
 	"TANK_KILLER"
 	{
-		"en"			"Tank killed the witch"
+		"#format"		"{1:d}"
+		"en"			"Tank killed the witch #{1}"
 	}
 
 	"SURVIVOR_KILLER"

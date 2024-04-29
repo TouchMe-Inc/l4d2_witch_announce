@@ -1,0 +1,40 @@
+"Phrases"
+{
+	"BRACKET_START"
+	{
+		"ru"			"┌ "
+	}
+
+	"BRACKET_MIDDLE"
+	{
+		"ru"			"├ "
+	}
+
+	"BRACKET_END"
+	{
+		"ru"			"└ "
+	}
+
+	"TAG"
+	{
+		"ru"			"<{green}Witch Killer Damage{default}> "
+	}
+
+	"INFO"
+	{
+		"#format"		"{1:d}"
+		"ru"			"Урон нанесённый ведьме #{1}:"
+	}
+
+	"TANK_KILLER"
+	{
+		"#format"		"{1:d}"
+		"ru"			"Танк убил ведьму #{1}"
+	}
+
+	"SURVIVOR_KILLER"
+	{
+		"#format"		"{1:s},{2:3.d},{3:2.0f}"
+		"ru"			"{default}{2} [{3}%%] {blue}{1}"
+	}
+}

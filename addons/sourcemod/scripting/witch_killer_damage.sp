@@ -10,7 +10,7 @@ public Plugin myinfo = {
 	name = "WitchKillerDamage",
 	author = "TouchMe",
 	description = "Displays in chat the damage done to the witch",
-	version = "build_0002",
+	version = "build_0003",
 	url = "https://github.com/TouchMe-Inc/l4d2_witch_killer_damage"
 }
 
@@ -34,7 +34,7 @@ enum struct WitchData
 	int iEnt;
 	int iNum;
 	int iKillerDamage[MAXPLAYERS + 1]; /*< Damage done to Witch, client tracking */
-	int iTotalDamage; /*< Total Damage done to Witch. */
+	int iTotalDamage;                  /*< Total Damage done to Witch. */
 	int iMaxHealth;
 }
 
@@ -73,7 +73,7 @@ public void OnPluginStart()
 	// Events.
 	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 	HookEvent("infected_hurt", Event_WitchHurt, EventHookMode_Post);
-	HookEvent("witch_killed", Event_WitchDeath, EventHookMode_Post);
+	HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
 
 	g_hWitchList = CreateArray(sizeof(WitchData));
 }
@@ -144,7 +144,7 @@ void Event_WitchHurt(Event event, const char[] sEventName, bool bDontBroadcast)
 	SetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 }
 
-void Event_WitchDeath(Event event, const char[] sEventName, bool bDontBroadcast)
+void Event_WitchKilled(Event event, const char[] sEventName, bool bDontBroadcast)
 {
 	int iWitchEnt = GetEventInt(event, "witchid");
 
@@ -166,7 +166,7 @@ void Event_WitchDeath(Event event, const char[] sEventName, bool bDontBroadcast)
 		 */
 		if (IsClientInfected(iKiller) && IsClientTank(iKiller))
 		{
-			CPrintToChatAll("%t%t", "TAG", "TANK_KILLER");
+			CPrintToChatAll("%t%t", "TAG", "TANK_KILLER", eWitchData.iNum);
 			return;
 		}
 
