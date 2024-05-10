@@ -64,6 +64,9 @@ public APLRes AskPluginLoad2(Handle myself, bool bLate, char[] sErr, int iErrLen
 	return APLRes_Success;
 }
 
+/**
+ *
+ */
 public void OnPluginStart()
 {
 	LoadTranslations(TRANSLATIONS);
@@ -87,6 +90,9 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 	ClearArray(g_hWitchList);
 }
 
+/**
+ *
+ */
 public void OnEntityCreated(int iEnt, const char[] sClassName)
 {
 	if (iEnt > MaxClients && IsValidEntity(iEnt) && StrEqual(sClassName, "witch"))
@@ -107,11 +113,14 @@ public void OnEntityCreated(int iEnt, const char[] sClassName)
 	}
 }
 
+/**
+ *
+ */
 void Event_WitchHurt(Event event, const char[] sEventName, bool bDontBroadcast)
 {
 	int iAttacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 
-	if (!IsValidClient(iAttacker) || !IsClientInGame(iAttacker) || !IsClientSurvivor(iAttacker)) {
+	if (!iAttacker || !IsClientInGame(iAttacker) || !IsClientSurvivor(iAttacker)) {
 		return;
 	}
 
@@ -127,16 +136,16 @@ void Event_WitchHurt(Event event, const char[] sEventName, bool bDontBroadcast)
 		return;
 	}
 
-	WitchData eWitchData;
-	GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
-
 	int iDamage = GetEventInt(event, "amount");
 	int iWitchHealth = GetEntProp(iVictimEnt, Prop_Data, "m_iHealth");
-	int iDelta = iWitchHealth - iDamage;
+	int iDeltaHealth = iWitchHealth - iDamage;
 
-	if (iDelta < 0) {
-		iDamage += iDelta;
+	if (iDeltaHealth < 0) {
+		iDamage += iDeltaHealth;
 	}
+
+	WitchData eWitchData;
+	GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 
 	eWitchData.iKillerDamage[iAttacker] += iDamage;
 	eWitchData.iTotalDamage += iDamage;
@@ -144,6 +153,9 @@ void Event_WitchHurt(Event event, const char[] sEventName, bool bDontBroadcast)
 	SetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 }
 
+/**
+ *
+ */
 void Event_WitchKilled(Event event, const char[] sEventName, bool bDontBroadcast)
 {
 	int iWitchEnt = GetEventInt(event, "witchid");
@@ -159,7 +171,7 @@ void Event_WitchKilled(Event event, const char[] sEventName, bool bDontBroadcast
 
 	int iKiller = GetClientOfUserId(GetEventInt(event, "userid"));
 
-	if (IsValidClient(iKiller) && IsClientInGame(iKiller))
+	if (iKiller && IsClientInGame(iKiller))
 	{
 		/**
 		 * Tank Killed the Witch.
@@ -170,6 +182,9 @@ void Event_WitchKilled(Event event, const char[] sEventName, bool bDontBroadcast
 			return;
 		}
 
+		/**
+		 * Survivor Killed the Witch.
+		 */
 		else if (IsClientSurvivor(iKiller))
 		{
 			if (eWitchData.iTotalDamage < eWitchData.iMaxHealth)
@@ -219,6 +234,9 @@ void Event_WitchKilled(Event event, const char[] sEventName, bool bDontBroadcast
 	RemoveFromArray(g_hWitchList, iWitchIndex);
 }
 
+/**
+ *
+ */
 void PrintToChatDamage(int iClient, int iWitchIndex, const int[] iPlayers, int iTotalPlayers)
 {
 	WitchData eWitchData;
@@ -245,6 +263,9 @@ void PrintToChatDamage(int iClient, int iWitchIndex, const int[] iPlayers, int i
 	}
 }
 
+/**
+ *
+ */
 int FindWitchIndex(int iWitchEnt)
 {
 	int iArraySize = GetArraySize(g_hWitchList);
@@ -271,23 +292,9 @@ int FindWitchIndex(int iWitchEnt)
 	return iWitchIndex;
 }
 
-bool IsWitch(int iEntity)
-{
-	if (iEntity > 0 && IsValidEntity(iEntity) && IsValidEdict(iEntity))
-	{
-		char strClassName[32];
-		GetEdictClassname(iEntity, strClassName, sizeof(strClassName));
-
-		return StrEqual(strClassName, "witch");
-	}
-
-	return false;
-}
-
-bool IsValidClient(int iClient) {
-	return (iClient > 0 && iClient <= MaxClients);
-}
-
+/**
+ *
+ */
 int SortDamage(int elem1, int elem2, const int[] array, Handle hndl)
 {
 	ResetPack(hndl);
@@ -309,14 +316,14 @@ int SortDamage(int elem1, int elem2, const int[] array, Handle hndl)
 }
 
 /**
- * Infected team player?
+ * Returns whether the player is infected.
  */
 bool IsClientInfected(int iClient) {
 	return (GetClientTeam(iClient) == TEAM_INFECTED);
 }
 
 /**
- * Survivor team player?
+ * Returns whether the player is survivor.
  */
 bool IsClientSurvivor(int iClient) {
 	return (GetClientTeam(iClient) == TEAM_SURVIVOR);
@@ -333,6 +340,25 @@ int GetClientClass(int iClient) {
 	return GetEntProp(iClient, Prop_Send, "m_zombieClass");
 }
 
+/**
+ *
+ */
+bool IsWitch(int iEntity)
+{
+	if (iEntity > 0 && IsValidEntity(iEntity) && IsValidEdict(iEntity))
+	{
+		char strClassName[32];
+		GetEdictClassname(iEntity, strClassName, sizeof(strClassName));
+
+		return StrEqual(strClassName, "witch");
+	}
+
+	return false;
+}
+
+/**
+ *
+ */
 bool IsClientTank(int iClient) {
 	return (GetClientClass(iClient) == CLASS_TANK);
 }
