@@ -17,7 +17,7 @@
 
 	"TAG"
 	{
-		"en"			"<{green}Witch Killer Damage{default}> "
+		"en"			"<{green}Witch Killer{default}> "
 	}
 
 	"INFO"
@@ -28,13 +28,18 @@
 
 	"TANK_KILLER"
 	{
-		"#format"		"{1:d}"
-		"en"			"Tank killed the witch #{1}"
+		"en"			"Tank killed the witch"
+	}
+
+	"ONESHOT"
+	{
+		"#format"		"{1:d},{2:s}"
+		"en"			"Witch #{1} killed in one shot by {blue}{2}"
 	}
 
 	"SURVIVOR_KILLER"
 	{
 		"#format"		"{1:s},{2:3.d},{3:2.0f}"
-		"en"			"{2} [{3}%%] {blue}{1}"
+		"en"			"{default}{2} dmg [{3}%%] {blue}{1}"
 	}
 }

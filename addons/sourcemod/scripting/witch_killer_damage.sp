@@ -7,11 +7,11 @@
 
 
 public Plugin myinfo = {
-	name = "WitchKillerDamage",
-	author = "TouchMe",
-	description = "Displays in chat the damage done to the witch",
-	version = "build_0003",
-	url = "https://github.com/TouchMe-Inc/l4d2_witch_killer_damage"
+    name        = "WitchKillerDamage",
+    author      = "TouchMe",
+    description = "Displays in chat the damage done to the witch",
+    version     = "build_0004",
+    url         = "https://github.com/TouchMe-Inc/l4d2_witch_killer_damage"
 }
 
 
@@ -31,11 +31,11 @@ public Plugin myinfo = {
 
 enum struct WitchData
 {
-	int iEnt;
-	int iNum;
-	int iKillerDamage[MAXPLAYERS + 1]; /*< Damage done to Witch, client tracking */
-	int iTotalDamage;                  /*< Total Damage done to Witch. */
-	int iMaxHealth;
+    int iEnt;
+    int iNum;
+    int iKillerDamage[MAXPLAYERS + 1]; /*< Damage done to Witch, client tracking */
+    int iTotalDamage;                  /*< Total Damage done to Witch. */
+    int iMaxHealth;
 }
 
 ConVar g_cvWitchHealth = null;
@@ -55,13 +55,13 @@ Handle g_hWitchList = null;
  */
 public APLRes AskPluginLoad2(Handle myself, bool bLate, char[] sErr, int iErrLen)
 {
-	if (GetEngineVersion() != Engine_Left4Dead2)
-	{
-		strcopy(sErr, iErrLen, "Plugin only supports Left 4 Dead 2.");
-		return APLRes_SilentFailure;
-	}
+    if (GetEngineVersion() != Engine_Left4Dead2)
+    {
+        strcopy(sErr, iErrLen, "Plugin only supports Left 4 Dead 2.");
+        return APLRes_SilentFailure;
+    }
 
-	return APLRes_Success;
+    return APLRes_Success;
 }
 
 /**
@@ -69,16 +69,16 @@ public APLRes AskPluginLoad2(Handle myself, bool bLate, char[] sErr, int iErrLen
  */
 public void OnPluginStart()
 {
-	LoadTranslations(TRANSLATIONS);
+    LoadTranslations(TRANSLATIONS);
 
-	g_cvWitchHealth = FindConVar("z_witch_health");
+    g_cvWitchHealth = FindConVar("z_witch_health");
 
-	// Events.
-	HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
-	HookEvent("infected_hurt", Event_WitchHurt, EventHookMode_Post);
-	HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
+    // Events.
+    HookEvent("round_start", Event_RoundStart, EventHookMode_PostNoCopy);
+    HookEvent("infected_hurt", Event_WitchHurt, EventHookMode_Post);
+    HookEvent("witch_killed", Event_WitchKilled, EventHookMode_Post);
 
-	g_hWitchList = CreateArray(sizeof(WitchData));
+    g_hWitchList = CreateArray(sizeof(WitchData));
 }
 
 /**
@@ -86,8 +86,8 @@ public void OnPluginStart()
  */
 void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 {
-	g_iWitchNum = 0;
-	ClearArray(g_hWitchList);
+    g_iWitchNum = 0;
+    ClearArray(g_hWitchList);
 }
 
 /**
@@ -95,22 +95,22 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
  */
 public void OnEntityCreated(int iEnt, const char[] sClassName)
 {
-	if (iEnt > MaxClients && IsValidEntity(iEnt) && StrEqual(sClassName, "witch"))
-	{
-		WitchData eWitchData;
-		eWitchData.iEnt = iEnt;
-		eWitchData.iNum = ++ g_iWitchNum;
+    if (iEnt > MaxClients && IsValidEntity(iEnt) && StrEqual(sClassName, "witch"))
+    {
+        WitchData eWitchData;
+        eWitchData.iEnt = iEnt;
+        eWitchData.iNum = ++ g_iWitchNum;
 
-		for (int iClient = 1; iClient <= MaxClients; iClient ++)
-		{
-			eWitchData.iKillerDamage[iClient] = 0;
-		}
+        for (int iClient = 1; iClient <= MaxClients; iClient ++)
+        {
+            eWitchData.iKillerDamage[iClient] = 0;
+        }
 
-		eWitchData.iTotalDamage = 0;
-		eWitchData.iMaxHealth = RoundToFloor(GetConVarFloat(g_cvWitchHealth));
+        eWitchData.iTotalDamage = 0;
+        eWitchData.iMaxHealth = RoundToFloor(GetConVarFloat(g_cvWitchHealth));
 
-		PushArrayArray(g_hWitchList, eWitchData);
-	}
+        PushArrayArray(g_hWitchList, eWitchData);
+    }
 }
 
 /**
@@ -118,39 +118,39 @@ public void OnEntityCreated(int iEnt, const char[] sClassName)
  */
 void Event_WitchHurt(Event event, const char[] sEventName, bool bDontBroadcast)
 {
-	int iAttacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+    int iAttacker = GetClientOfUserId(GetEventInt(event, "attacker"));
 
-	if (!iAttacker || !IsClientInGame(iAttacker) || !IsClientSurvivor(iAttacker)) {
-		return;
-	}
+    if (!iAttacker || !IsClientInGame(iAttacker) || !IsClientSurvivor(iAttacker)) {
+        return;
+    }
 
-	int iVictimEnt = GetEventInt(event, "entityid");
+    int iVictimEnt = GetEventInt(event, "entityid");
 
-	if (!IsWitch(iVictimEnt)) {
-		return;
-	}
+    if (!IsWitch(iVictimEnt)) {
+        return;
+    }
 
-	int iWitchIndex = FindWitchIndex(iVictimEnt);
+    int iWitchIndex = FindWitchIndex(iVictimEnt);
 
-	if (iWitchIndex == -1) {
-		return;
-	}
+    if (iWitchIndex == -1) {
+        return;
+    }
 
-	int iDamage = GetEventInt(event, "amount");
-	int iWitchHealth = GetEntProp(iVictimEnt, Prop_Data, "m_iHealth");
-	int iDeltaHealth = iWitchHealth - iDamage;
+    int iDamage = GetEventInt(event, "amount");
+    int iWitchHealth = GetEntProp(iVictimEnt, Prop_Data, "m_iHealth");
+    int iDeltaHealth = iWitchHealth - iDamage;
 
-	if (iDeltaHealth < 0) {
-		iDamage += iDeltaHealth;
-	}
+    if (iDeltaHealth < 0) {
+        iDamage += iDeltaHealth;
+    }
 
-	WitchData eWitchData;
-	GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
+    WitchData eWitchData;
+    GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 
-	eWitchData.iKillerDamage[iAttacker] += iDamage;
-	eWitchData.iTotalDamage += iDamage;
+    eWitchData.iKillerDamage[iAttacker] += iDamage;
+    eWitchData.iTotalDamage += iDamage;
 
-	SetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
+    SetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 }
 
 /**
@@ -158,109 +158,118 @@ void Event_WitchHurt(Event event, const char[] sEventName, bool bDontBroadcast)
  */
 void Event_WitchKilled(Event event, const char[] sEventName, bool bDontBroadcast)
 {
-	int iWitchEnt = GetEventInt(event, "witchid");
+    int iWitchEnt = GetEventInt(event, "witchid");
 
-	int iWitchIndex = FindWitchIndex(iWitchEnt);
+    int iWitchIndex = FindWitchIndex(iWitchEnt);
 
-	if (iWitchIndex == -1) {
-		return;
-	}
+    if (iWitchIndex == -1) {
+        return;
+    }
 
-	WitchData eWitchData;
-	GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
+    WitchData eWitchData;
+    GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 
-	int iKiller = GetClientOfUserId(GetEventInt(event, "userid"));
+    int iKiller = GetClientOfUserId(GetEventInt(event, "userid"));
 
-	if (iKiller && IsClientInGame(iKiller))
-	{
-		/**
-		 * Tank Killed the Witch.
-		 */
-		if (IsClientInfected(iKiller) && IsClientTank(iKiller))
-		{
-			CPrintToChatAll("%t%t", "TAG", "TANK_KILLER", eWitchData.iNum);
-			return;
-		}
+    if (iKiller && IsClientInGame(iKiller))
+    {
+        /**
+         * Tank Killed the Witch.
+         */
+        if (IsClientInfected(iKiller) && IsClientTank(iKiller))
+        {
+            CPrintToChatAll("%t%t", "TAG", "TANK_KILLER", eWitchData.iNum);
+            return;
+        }
 
-		/**
-		 * Survivor Killed the Witch.
-		 */
-		else if (IsClientSurvivor(iKiller))
-		{
-			if (eWitchData.iTotalDamage < eWitchData.iMaxHealth)
-			{
-				eWitchData.iKillerDamage[iKiller] += (eWitchData.iMaxHealth - eWitchData.iTotalDamage);
-				eWitchData.iTotalDamage = eWitchData.iMaxHealth;
+        /**
+         * Survivor Killed the Witch.
+         */
+        else if (IsClientSurvivor(iKiller))
+        {
+            if (GetEventBool(event, "oneshot"))
+            {
+                char sKillerName[32];
+                GetClientNameFixed(iKiller, sKillerName, sizeof(sKillerName), 18);
 
-				SetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
-			}
-		}
-	}
+                CPrintToChatAll("%t%t", "TAG", "ONESHOT", eWitchData.iNum, sKillerName);
+                return;
+            }
 
-	int iTotalPlayers = 0;
-	int[] iPlayers = new int[MaxClients];
+            if (eWitchData.iTotalDamage < eWitchData.iMaxHealth)
+            {
+                eWitchData.iKillerDamage[iKiller] += (eWitchData.iMaxHealth - eWitchData.iTotalDamage);
+                eWitchData.iTotalDamage = eWitchData.iMaxHealth;
 
-	for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer ++)
-	{
-		if (!IsClientInGame(iPlayer)
-		|| !IsClientSurvivor(iPlayer)
-		|| !eWitchData.iKillerDamage[iPlayer]) {
-			continue;
-		}
+                SetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
+            }
+        }
+    }
 
-		iPlayers[iTotalPlayers ++] = iPlayer;
-	}
+    int iTotalPlayers = 0;
+    int[] iPlayers = new int[MaxClients];
 
-	if (!iTotalPlayers)
-	{
-		RemoveFromArray(g_hWitchList, iWitchIndex);
-		return;
-	}
+    for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer ++)
+    {
+        if (!IsClientInGame(iPlayer)
+        || !IsClientSurvivor(iPlayer)
+        || !eWitchData.iKillerDamage[iPlayer]) {
+            continue;
+        }
 
-	Handle hDataPack = CreateDataPack();
-	WritePackCell(hDataPack, iWitchIndex);
-	SortCustom1D(iPlayers, iTotalPlayers, SortDamage, hDataPack);
-	CloseHandle(hDataPack);
+        iPlayers[iTotalPlayers ++] = iPlayer;
+    }
 
-	for (int iClient = 1; iClient <= MaxClients; iClient ++)
-	{
-		if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
-			continue;
-		}
+    if (!iTotalPlayers)
+    {
+        RemoveFromArray(g_hWitchList, iWitchIndex);
+        return;
+    }
 
-		PrintToChatDamage(iClient, iWitchIndex, iPlayers, iTotalPlayers);
-	}
+    Handle hDataPack = CreateDataPack();
+    WritePackCell(hDataPack, iWitchIndex);
+    SortCustom1D(iPlayers, iTotalPlayers, SortDamage, hDataPack);
+    CloseHandle(hDataPack);
 
-	RemoveFromArray(g_hWitchList, iWitchIndex);
+    for (int iClient = 1; iClient <= MaxClients; iClient ++)
+    {
+        if (!IsClientInGame(iClient) || IsFakeClient(iClient)) {
+            continue;
+        }
+
+        PrintToChatWitchDamage(iClient, iWitchIndex, iPlayers, iTotalPlayers);
+    }
+
+    RemoveFromArray(g_hWitchList, iWitchIndex);
 }
 
 /**
  *
  */
-void PrintToChatDamage(int iClient, int iWitchIndex, const int[] iPlayers, int iTotalPlayers)
+void PrintToChatWitchDamage(int iClient, int iWitchIndex, const int[] iPlayers, int iTotalPlayers)
 {
-	WitchData eWitchData;
-	GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
+    WitchData eWitchData;
+    GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 
-	CPrintToChat(iClient, "%T%T%T", "BRACKET_START", iClient, "TAG", iClient, "INFO", iClient, eWitchData.iNum);
+    CPrintToChat(iClient, "%T%T%T", "BRACKET_START", iClient, "TAG", iClient, "INFO", iClient, eWitchData.iNum);
 
-	char sName[MAX_NAME_LENGTH];
+    char sName[MAX_NAME_LENGTH];
 
-	for (int iItem = 0; iItem < iTotalPlayers; iItem ++)
-	{
-		int iPlayer = iPlayers[iItem];
-		float fDamageProcent = 100.0 * float(eWitchData.iKillerDamage[iPlayer]) / float(eWitchData.iMaxHealth);
+    for (int iItem = 0; iItem < iTotalPlayers; iItem ++)
+    {
+        int iPlayer = iPlayers[iItem];
+        float fDamageProcent = 100.0 * float(eWitchData.iKillerDamage[iPlayer]) / float(eWitchData.iMaxHealth);
 
-		GetClientNameFixed(iPlayer, sName, sizeof(sName), 18);
+        GetClientNameFixed(iPlayer, sName, sizeof(sName), 18);
 
-		CPrintToChat(iClient, "%T%T",
-			(iItem + 1) == iTotalPlayers ? "BRACKET_END" : "BRACKET_MIDDLE", iClient,
-			"SURVIVOR_KILLER", iClient,
-			sName,
-			eWitchData.iKillerDamage[iPlayer],
-			fDamageProcent
-		);
-	}
+        CPrintToChat(iClient, "%T%T",
+            (iItem + 1) == iTotalPlayers ? "BRACKET_END" : "BRACKET_MIDDLE", iClient,
+            "SURVIVOR_KILLER", iClient,
+            sName,
+            eWitchData.iKillerDamage[iPlayer],
+            fDamageProcent
+        );
+    }
 }
 
 /**
@@ -268,28 +277,28 @@ void PrintToChatDamage(int iClient, int iWitchIndex, const int[] iPlayers, int i
  */
 int FindWitchIndex(int iWitchEnt)
 {
-	int iArraySize = GetArraySize(g_hWitchList);
+    int iArraySize = GetArraySize(g_hWitchList);
 
-	if (!iArraySize) {
-		return -1;
-	}
+    if (!iArraySize) {
+        return -1;
+    }
 
-	int iWitchIndex = -1;
+    int iWitchIndex = -1;
 
-	WitchData eWitchData;
+    WitchData eWitchData;
 
-	for (int iIndex = 0; iIndex < iArraySize; iIndex ++)
-	{
-		GetArrayArray(g_hWitchList, iIndex, eWitchData);
+    for (int iIndex = 0; iIndex < iArraySize; iIndex ++)
+    {
+        GetArrayArray(g_hWitchList, iIndex, eWitchData);
 
-		if (eWitchData.iEnt == iWitchEnt)
-		{
-			iWitchIndex = iIndex;
-			break;
-		}
-	}
+        if (eWitchData.iEnt == iWitchEnt)
+        {
+            iWitchIndex = iIndex;
+            break;
+        }
+    }
 
-	return iWitchIndex;
+    return iWitchIndex;
 }
 
 /**
@@ -297,36 +306,36 @@ int FindWitchIndex(int iWitchEnt)
  */
 int SortDamage(int elem1, int elem2, const int[] array, Handle hndl)
 {
-	ResetPack(hndl);
-	int iWitchIndex = ReadPackCell(hndl);
+    ResetPack(hndl);
+    int iWitchIndex = ReadPackCell(hndl);
 
-	WitchData eWitchData;
-	GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
+    WitchData eWitchData;
+    GetArrayArray(g_hWitchList, iWitchIndex, eWitchData);
 
-	int iDamage1 = eWitchData.iKillerDamage[elem1];
-	int iDamage2 = eWitchData.iKillerDamage[elem2];
+    int iDamage1 = eWitchData.iKillerDamage[elem1];
+    int iDamage2 = eWitchData.iKillerDamage[elem2];
 
-	if (iDamage1 > iDamage2) {
-		return -1;
-	} else if (iDamage1 < iDamage2) {
-		return 1;
-	}
+    if (iDamage1 > iDamage2) {
+        return -1;
+    } else if (iDamage1 < iDamage2) {
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
  * Returns whether the player is infected.
  */
 bool IsClientInfected(int iClient) {
-	return (GetClientTeam(iClient) == TEAM_INFECTED);
+    return (GetClientTeam(iClient) == TEAM_INFECTED);
 }
 
 /**
  * Returns whether the player is survivor.
  */
 bool IsClientSurvivor(int iClient) {
-	return (GetClientTeam(iClient) == TEAM_SURVIVOR);
+    return (GetClientTeam(iClient) == TEAM_SURVIVOR);
 }
 
 /**
@@ -337,7 +346,7 @@ bool IsClientSurvivor(int iClient) {
  * @return L4D2      1=SMOKER, 2=BOOMER, 3=HUNTER, 4=SPITTER, 5=JOCKEY, 6=CHARGER, 7=WITCH, 8=TANK, 9=NOT INFECTED
  */
 int GetClientClass(int iClient) {
-	return GetEntProp(iClient, Prop_Send, "m_zombieClass");
+    return GetEntProp(iClient, Prop_Send, "m_zombieClass");
 }
 
 /**
@@ -345,22 +354,22 @@ int GetClientClass(int iClient) {
  */
 bool IsWitch(int iEntity)
 {
-	if (iEntity > 0 && IsValidEntity(iEntity) && IsValidEdict(iEntity))
-	{
-		char strClassName[32];
-		GetEdictClassname(iEntity, strClassName, sizeof(strClassName));
+    if (iEntity > 0 && IsValidEntity(iEntity) && IsValidEdict(iEntity))
+    {
+        char strClassName[32];
+        GetEdictClassname(iEntity, strClassName, sizeof(strClassName));
 
-		return StrEqual(strClassName, "witch");
-	}
+        return StrEqual(strClassName, "witch");
+    }
 
-	return false;
+    return false;
 }
 
 /**
  *
  */
 bool IsClientTank(int iClient) {
-	return (GetClientClass(iClient) == CLASS_TANK);
+    return (GetClientClass(iClient) == CLASS_TANK);
 }
 
 /**
@@ -368,11 +377,11 @@ bool IsClientTank(int iClient) {
  */
 void GetClientNameFixed(int iClient, char[] name, int length, int iMaxSize)
 {
-	GetClientName(iClient, name, length);
+    GetClientName(iClient, name, length);
 
-	if (strlen(name) > iMaxSize)
-	{
-		name[iMaxSize - 3] = name[iMaxSize - 2] = name[iMaxSize - 1] = '.';
-		name[iMaxSize] = '\0';
-	}
+    if (strlen(name) > iMaxSize)
+    {
+        name[iMaxSize - 3] = name[iMaxSize - 2] = name[iMaxSize - 1] = '.';
+        name[iMaxSize] = '\0';
+    }
 }
