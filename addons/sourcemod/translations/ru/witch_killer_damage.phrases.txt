@@ -35,7 +35,7 @@
 	"ONESHOT"
 	{
 		"#format"		"{1:d},{2:s}"
-		"ru"			"{blue}{2}{default} убил ведьму #{1} за один выстрел"
+		"ru"			"{blue}{2}{default} убил ведьму #{1} одним выстрелом"
 	}
 
 	"SURVIVOR_KILLER"
