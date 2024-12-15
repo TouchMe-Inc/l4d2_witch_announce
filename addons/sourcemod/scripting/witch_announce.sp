@@ -464,6 +464,8 @@ void PrintWitchInfo(int iWitchEnt)
 
     int iLastPct = 100;
     int iAdjustedPctDmg;
+    char szDmgSpace[16], szPrcntSpace[16];
+
     for (int iAttacker = 0; iAttacker < iSize; iAttacker++)
     {
         // generally needed
@@ -491,11 +493,9 @@ void PrintWitchInfo(int iWitchEnt)
         bool bHarrasser = uDamagerVector.Get(iAttacker, eHarrasser);
         if (iDmg > 0 || bHarrasser || bArsonist)
         {
-            char szDmgSpace[16];
             FormatEx(szDmgSpace, sizeof(szDmgSpace), "%s",
             iDmg < 10 ? "      " : iDmg < 100 ? "    " : iDmg < 1000 ? "  " : "");
 
-            char szPrcntSpace[16];
             FormatEx(szPrcntSpace, sizeof(szPrcntSpace), "%s",
             iPct < 10 ? "  " : iPct < 100 ? " " : "");
 
