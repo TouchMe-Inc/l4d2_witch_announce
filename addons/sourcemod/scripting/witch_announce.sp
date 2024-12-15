@@ -9,7 +9,7 @@
 #define DMG_BURN (1 << 3) /**< heat burned */
 
 /*
- * Infected Class.
+ *
  */
 #define WORLD_INDEX            0
 
@@ -112,6 +112,7 @@ enum {
 };
 
 enum {
+    eWitchIndex,         // Serial number of Witch spawned on this map
     eWitchLastHealth,    // Last HP after hit
     eWitchMaxHealth,     // Max HP
     eWitchHarrasser,     // Witch Harrasser
@@ -124,6 +125,7 @@ UserVector g_aWitchInfo = null;     // Every Witch has a slot here along with re
 StringMap  g_smUserNames = null;    // Simple map from userid to player names.
 
 ConVar g_cvWitchHealth = null;
+int    g_iWitchIdx     = 0; 
 int    g_iWitchHealth  = 0;
 
 public Plugin myinfo = {
@@ -138,8 +140,8 @@ public void OnPluginStart()
 {
     LoadTranslations(TRANSLATIONS);
 
-    HookEvent("round_start",                Event_RoundStart);
-    HookEvent("round_end",                  Event_RoundEnd);
+    HookEvent("round_start",                Event_RoundStart, EventHookMode_PostNoCopy);
+    HookEvent("round_end",                  Event_RoundEnd, EventHookMode_PostNoCopy);
     HookEvent("witch_spawn",                Event_WitchSpawn);
     HookEvent("witch_harasser_set",         Event_WitchHarasserSet);
     HookEvent("infected_hurt",              Event_InfectedHurt);
@@ -157,9 +159,11 @@ public void OnPluginStart()
     int iEntityMaxCount = GetEntityCount();
     for (int iEnt = MaxClients + 1; iEnt <= iEntityMaxCount; iEnt++)
     {
-        if (!IsEntityWitch(iEnt))
+        if (!IsEntityWitch(iEnt)) {
             continue;
+        }
 
+        g_aWitchInfo.EntSet(iEnt, eWitchIndex, ++ g_iWitchIdx);
         g_aWitchInfo.EntSet(iEnt, eDamagerInfoVector, new UserVector(eDamagerInfoSize), true);
         g_aWitchInfo.EntSet(iEnt, eWitchLastHealth, g_iWitchHealth);
         g_aWitchInfo.EntSet(iEnt, eWitchMaxHealth, g_iWitchHealth);
@@ -186,19 +190,22 @@ void ConVarChanged(ConVar cv, const char[] szOldValie, const char[] szNewValue) 
 
 void Event_RoundStart(Event event, const char[] szEventName, bool bDontBroadcast)
 {
+    g_iWitchIdx = 0;
     SetupWitchInfo();
     g_smUserNames.Clear();
 }
 
 void Event_RoundEnd(Event event, const char[] szEventName, bool bDontBroadcast)
 {
+    g_iWitchIdx = 0;
     SetupWitchInfo();
     g_smUserNames.Clear();
 }
 
 void Event_WitchSpawn(Event event, const char[] szEventName, bool bDontBroadcast)
 {
-    int iWitch = event.GetInt("witchid");
+    int iWitch = GetEventInt(event, "witchid");
+    g_aWitchInfo.EntSet(iWitch, eWitchIndex, ++g_iWitchIdx);
     g_aWitchInfo.EntSet(iWitch, eDamagerInfoVector, new UserVector(eDamagerInfoSize), true);
     g_aWitchInfo.EntSet(iWitch, eWitchLastHealth, g_iWitchHealth);
     g_aWitchInfo.EntSet(iWitch, eWitchMaxHealth, g_iWitchHealth);
@@ -212,8 +219,9 @@ void Event_WitchHarasserSet(Event event, const char[] szEventName, bool bDontBro
     int iAttackerId = GetEventInt(event, "userid");
     int iAttacker = GetClientOfUserId(iAttackerId);
 
-    if (!IsValidClient(iAttacker) || !IsClientSurvivor(iAttacker))
+    if (!IsValidClient(iAttacker) || !IsClientSurvivor(iAttacker)) {
         return;
+    }
 
     g_aWitchInfo.EntSet(iWitch, eWitchHarrasser, iAttackerId);
 
@@ -226,8 +234,9 @@ void Event_WitchHarasserSet(Event event, const char[] szEventName, bool bDontBro
 void Event_InfectedHurt(Event event, const char[] szEventName, bool bDontBroadcast)
 {
     int iWitch = GetEventInt(event, "entityid");
-    if (!IsEntityWitch(iWitch))
+    if (!IsEntityWitch(iWitch)) {
         return;
+    }
 
     int iAttackerId = GetEventInt(event, "attacker");
     int iAttacker   = GetClientOfUserId(iAttackerId);
@@ -260,10 +269,13 @@ void Event_InfectedHurt(Event event, const char[] szEventName, bool bDontBroadca
         int iWitchArsonist  = GetClientOfUserId(iWitchArsonistId);
         int iWitchHarrasser = GetClientOfUserId(iWitchHarrasserId);
 
-        if (IsValidClient(iWitchArsonist) && IsClientSurvivor(iWitchArsonist)) {
+        if (IsValidClient(iWitchArsonist) && IsClientSurvivor(iWitchArsonist))
+        {
             iAttackerId = iWitchArsonistId;
             iAttacker   = iWitchArsonist;
-        } else if (IsValidClient(iWitchHarrasser) && IsClientSurvivor(iWitchHarrasser)) {
+        }
+        else if (IsValidClient(iWitchHarrasser) && IsClientSurvivor(iWitchHarrasser))
+        {
             iAttackerId = iWitchHarrasserId;
             iAttacker   = iWitchHarrasser;
         }
@@ -307,13 +319,18 @@ void Event_WitchKilled(Event event, const char[] szEventName, bool bDontBroadcas
         int iWitchArsonist  = GetClientOfUserId(iWitchArsonistId);
         int iWitchHarrasser = GetClientOfUserId(iWitchHarrasserId);
 
-        if (IsValidClient(iWitchArsonist) && IsClientSurvivor(iWitchArsonist)) {
+        if (IsValidClient(iWitchArsonist) && IsClientSurvivor(iWitchArsonist))
+        {
             iAttackerId = iWitchArsonistId;
             iAttacker   = iWitchArsonist;
-        } else if (IsValidClient(iWitchHarrasser) && IsClientSurvivor(iWitchHarrasser)) {
+        }
+        else if (IsValidClient(iWitchHarrasser) && IsClientSurvivor(iWitchHarrasser))
+        {
             iAttackerId = iWitchHarrasserId;
             iAttacker   = iWitchHarrasser;
-        } else {
+        }
+        else
+        {
             iAttackerId = 0;
             iAttacker   = 0;
         }
@@ -375,12 +392,14 @@ void Event_PlayerHurt(Event event, const char[] szEventName, bool bDontBroadcast
 void Event_PlayerIncap(Event event, const char[] szEventName, bool bDontBroadcast)
 {
     int iVictim = GetClientOfUserId(GetEventInt(event, "userid"));
-    if (iVictim <= 0 || !IsClientSurvivor(iVictim))
+    if (iVictim <= 0 || !IsClientSurvivor(iVictim)) {
         return;
+    }
 
-    int iWitch = event.GetInt("attackerentid");
-    if (!IsEntityWitch(iWitch))
+    int iWitch = GetEventInt(event, "attackerentid");
+    if (!IsEntityWitch(iWitch)) {
         return;
+    }
 
     PrintWitchInfo(iWitch);
     ClearWitchInfo(iWitch);
@@ -388,8 +407,9 @@ void Event_PlayerIncap(Event event, const char[] szEventName, bool bDontBroadcas
 
 public void OnEntityDestroyed(int iEnt)
 {
-    if (!IsEntityWitch(iEnt))
+    if (!IsEntityWitch(iEnt)) {
         return;
+    }
 
     ClearWitchInfo(iEnt);
 }
@@ -423,7 +443,7 @@ void PrintWitchInfo(int iWitchEnt)
     for (int i = 0; i < iSize; i++)
     {
         iDmgTtl += uDamagerVector.Get(i, eDmgDone);
-        iPctTtl += GetDamageAsPercent(uDamagerVector.Get(i, eDmgDone));
+        iPctTtl += GetDamageAsPercent(uDamagerVector.Get(i, eDmgDone), iMaxHealth);
     }
 
     if (iLastHealth == 0) {
@@ -452,8 +472,8 @@ void PrintWitchInfo(int iWitchEnt)
 
         iDmg = uDamagerVector.Get(iAttacker, eDmgDone);
 
-        iPct = GetDamageAsPercent(iDmg);
-        if (iPctAdjustment != 0 && iDmg > 0 && !IsExactPercent(iDmg))
+        iPct = GetDamageAsPercent(iDmg, iMaxHealth);
+        if (iPctAdjustment != 0 && iDmg > 0 && !IsExactPercent(iDmg, iMaxHealth))
         {
             iAdjustedPctDmg = iPct + iPctAdjustment;
 
@@ -509,14 +529,16 @@ void SetupWitchInfo()
 // utilize our map g_smUserNames
 bool GetClientNameFromUserId(int iUserId, char[] szClientName, int iMaxLen)
 {
-    if (iUserId == 0) {
+    if (iUserId == WORLD_INDEX)
+    {
         FormatEx(szClientName, iMaxLen, "World");
         return true;
     }
 
     int iClient = GetClientOfUserId(iUserId);
-    if (iClient && IsClientInGame(iClient))
+    if (iClient && IsClientInGame(iClient)) {
         return GetClientNameFixed(iClient, szClientName, iMaxLen, 18);
+    }
 
     char szKey[16];
     IntToString(iUserId, szKey, sizeof(szKey));
@@ -533,12 +555,12 @@ int SortAdtDamageDesc(int iIdx1, int iIdx2, Handle hArray, Handle hHndl)
     return 0;
 }
 
-int GetDamageAsPercent(int iDmg) {
-    return RoundToFloor((float(iDmg) / g_iWitchHealth) * 100.0);
+int GetDamageAsPercent(int iDmg, int iMaxHealth) {
+    return RoundToFloor((float(iDmg) / iMaxHealth) * 100.0);
 }
 
-bool IsExactPercent(int iDmg) {
-    return (FloatAbs(float(GetDamageAsPercent(iDmg)) - ((float(iDmg) / g_iWitchHealth) * 100.0)) < 0.001) ? true : false;
+bool IsExactPercent(int iDmg, int iMaxHealth) {
+    return (FloatAbs(float(GetDamageAsPercent(iDmg, iMaxHealth)) - ((float(iDmg) / iMaxHealth) * 100.0)) < 0.001) ? true : false;
 }
 
 bool IsEntityWitch(int iEnt)
