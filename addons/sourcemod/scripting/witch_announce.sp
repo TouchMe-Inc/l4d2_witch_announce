@@ -5,6 +5,15 @@
 #include <colors>
 
 
+public Plugin myinfo = {
+    name        = "WitchAnnounce",
+    author      = "CanadaRox, TouchMe",
+    description = "Prints damage done to witches",
+    version     = "build_0001",
+    url         = "https://github.com/TouchMe-Inc/l4d2_witch_announce"
+};
+
+
 #define ENTITY_NAME_LENGTH 64
 #define DMG_BURN (1 << 3) /**< heat burned */
 
@@ -128,13 +137,6 @@ ConVar g_cvWitchHealth = null;
 int    g_iWitchIdx     = 0; 
 int    g_iWitchHealth  = 0;
 
-public Plugin myinfo = {
-    name        = "WitchAnnounce",
-    author      = "CanadaRox, TouchMe",
-    description = "Prints damage done to witches",
-    version     = "build_0000",
-    url         = "https://github.com/TouchMe-Inc/l4d2_witch_announce"
-};
 
 public void OnPluginStart()
 {
@@ -163,7 +165,7 @@ public void OnPluginStart()
             continue;
         }
 
-        g_aWitchInfo.EntSet(iEnt, eWitchIndex, ++ g_iWitchIdx);
+        g_aWitchInfo.EntSet(iEnt, eWitchIndex, ++g_iWitchIdx);
         g_aWitchInfo.EntSet(iEnt, eDamagerInfoVector, new UserVector(eDamagerInfoSize), true);
         g_aWitchInfo.EntSet(iEnt, eWitchLastHealth, g_iWitchHealth);
         g_aWitchInfo.EntSet(iEnt, eWitchMaxHealth, g_iWitchHealth);
