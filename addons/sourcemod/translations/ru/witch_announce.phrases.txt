@@ -1,0 +1,51 @@
+"Phrases"
+{
+	"BRACKET_START"
+	{
+		"ru"			"┌ "
+	}
+
+	"BRACKET_MIDDLE"
+	{
+		"ru"			"├ "
+	}
+
+	"BRACKET_END"
+	{
+		"ru"			"└ "
+	}
+
+	"TAG"
+	{
+		"ru"			"<{green}Witch{default}> "
+	}
+
+	"DEAD"
+	{
+		"ru"			"{olive}Ведьма{default} убита! {olive}Урон{default} нанесённый {olive}Ведьме{default}:"
+	}
+
+	"INCAP"
+	{
+		"#format"		"{1:d}"
+		"ru"			"У {olive}Ведьмы{default} осталось {olive}{1}{default} здоровья:"
+	}
+
+	"ONESHOT"
+	{
+		"#format"		"{1:s}"
+		"ru"			"{olive}Ведьма{default} была убита за один выстрел {blue}{1}"
+	}
+
+	"ONEPUNCH"
+	{
+		"#format"		"{1:s}"
+		"ru"			"{olive}Ведьма{default} была убита одним ударом {red}{1}"
+	}
+
+	"DAMAGE"
+	{
+		"#format"		"{1:s},{2:d},{3:s},{4:d},{5:s},{6:s},{7:s},{8:s},{9:s}"
+		"ru"			"{default}{1}{2} {green}[{3}{default}{4}%%{green}{5}] {green}{6}{7}{8}{green}{9}"
+	}
+}
