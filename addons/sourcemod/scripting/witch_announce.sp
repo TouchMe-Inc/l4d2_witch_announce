@@ -9,18 +9,19 @@ public Plugin myinfo = {
     name        = "WitchAnnounce",
     author      = "CanadaRox, TouchMe",
     description = "Prints damage done to witches",
-    version     = "build_0001",
+    version     = "build_0002",
     url         = "https://github.com/TouchMe-Inc/l4d2_witch_announce"
 };
 
 
-#define ENTITY_NAME_LENGTH 64
-#define DMG_BURN (1 << 3) /**< heat burned */
+#define ENTITY_NAME_LENGTH     64
+#define SHORT_NAME_LENGTH      18
+#define DMG_BURN               (1 << 3) /**< heat burned */
 
 /*
  *
  */
-#define WORLD_INDEX            0
+#define WORLD_INDEX             0
 
 /*
  * Infected Class.
@@ -50,6 +51,13 @@ methodmap UserVector < ArrayList {
 
     public void Set(int iIdx, any val, int iType) {
         SetArrayCell(this, iIdx, val, iType + 1);
+    }
+
+    public void Remove(int iIdx) {
+        UserVector uDamagerVector = this.Get(iIdx, eDamagerInfoVector);
+        delete uDamagerVector;
+
+        RemoveFromArray(this, iIdx);
     }
 
     public int Ent(int iIdx) {
@@ -134,7 +142,7 @@ UserVector g_aWitchInfo = null;     // Every Witch has a slot here along with re
 StringMap  g_smUserNames = null;    // Simple map from userid to player names.
 
 ConVar g_cvWitchHealth = null;
-int    g_iWitchIdx     = 0; 
+int    g_iWitchIdx     = 0;
 int    g_iWitchHealth  = 0;
 
 
@@ -143,7 +151,6 @@ public void OnPluginStart()
     LoadTranslations(TRANSLATIONS);
 
     HookEvent("round_start",                Event_RoundStart, EventHookMode_PostNoCopy);
-    HookEvent("round_end",                  Event_RoundEnd, EventHookMode_PostNoCopy);
     HookEvent("witch_spawn",                Event_WitchSpawn);
     HookEvent("witch_harasser_set",         Event_WitchHarasserSet);
     HookEvent("infected_hurt",              Event_InfectedHurt);
@@ -182,7 +189,7 @@ public void OnClientDisconnect(int iClient)
     IntToString(iUserId, szKey, sizeof(szKey));
 
     char szClientName[MAX_NAME_LENGTH];
-    GetClientNameFixed(iClient, szClientName, sizeof(szClientName), 18);
+    GetClientNameFixed(iClient, szClientName, sizeof(szClientName), SHORT_NAME_LENGTH);
     g_smUserNames.SetString(szKey, szClientName);
 }
 
@@ -193,14 +200,11 @@ void ConVarChanged(ConVar cv, const char[] szOldValie, const char[] szNewValue) 
 void Event_RoundStart(Event event, const char[] szEventName, bool bDontBroadcast)
 {
     g_iWitchIdx = 0;
-    SetupWitchInfo();
-    g_smUserNames.Clear();
-}
 
-void Event_RoundEnd(Event event, const char[] szEventName, bool bDontBroadcast)
-{
-    g_iWitchIdx = 0;
-    SetupWitchInfo();
+    while (g_aWitchInfo.Length) {
+        g_aWitchInfo.Remove(0);
+    }
+
     g_smUserNames.Clear();
 }
 
@@ -465,7 +469,6 @@ void PrintWitchInfo(int iWitchEnt)
     int iLastPct = 100;
     int iAdjustedPctDmg;
     char szDmgSpace[16], szPrcntSpace[16];
-
     for (int iAttacker = 0; iAttacker < iSize; iAttacker++)
     {
         // generally needed
@@ -511,21 +514,7 @@ void ClearWitchInfo(int iWitchEnt)
         return;
     }
 
-    UserVector uDamagerVector = g_aWitchInfo.Get(iIdx, eDamagerInfoVector);
-    delete uDamagerVector;
-
-    g_aWitchInfo.Erase(iIdx);
-}
-
-void SetupWitchInfo()
-{
-    while (g_aWitchInfo.Length)
-    {
-        UserVector uDamagerVector = g_aWitchInfo.Get(0, eDamagerInfoVector);
-        delete uDamagerVector;
-
-        g_aWitchInfo.Erase(0);
-    }
+    g_aWitchInfo.Remove(iIdx);
 }
 
 // utilize our map g_smUserNames
@@ -539,7 +528,7 @@ bool GetClientNameFromUserId(int iUserId, char[] szClientName, int iMaxLen)
 
     int iClient = GetClientOfUserId(iUserId);
     if (iClient && IsClientInGame(iClient)) {
-        return GetClientNameFixed(iClient, szClientName, iMaxLen, 18);
+        return GetClientNameFixed(iClient, szClientName, iMaxLen, SHORT_NAME_LENGTH);
     }
 
     char szKey[16];
