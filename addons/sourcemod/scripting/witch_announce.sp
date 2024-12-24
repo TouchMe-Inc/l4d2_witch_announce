@@ -37,6 +37,7 @@ public Plugin myinfo = {
 
 #define TRANSLATIONS            "witch_announce.phrases"
 
+
 /**
  * Entity-Relationship: UserVector(Userid, ...)
  */
@@ -54,9 +55,6 @@ methodmap UserVector < ArrayList {
     }
 
     public void Remove(int iIdx) {
-        UserVector uDamagerVector = this.Get(iIdx, eDamagerInfoVector);
-        delete uDamagerVector;
-
         RemoveFromArray(this, iIdx);
     }
 
@@ -201,7 +199,10 @@ void Event_RoundStart(Event event, const char[] szEventName, bool bDontBroadcast
 {
     g_iWitchIdx = 0;
 
-    while (g_aWitchInfo.Length) {
+    while (g_aWitchInfo.Length)
+    {
+        UserVector uDamagerVector = g_aWitchInfo.Get(0, eDamagerInfoVector);
+        delete uDamagerVector;
         g_aWitchInfo.Remove(0);
     }
 
@@ -513,6 +514,9 @@ void ClearWitchInfo(int iWitchEnt)
     if (!g_aWitchInfo.EntIndex(iWitchEnt, iIdx, false)) {
         return;
     }
+
+    UserVector uDamagerVector = g_aWitchInfo.Get(iIdx, eDamagerInfoVector);
+    delete uDamagerVector;
 
     g_aWitchInfo.Remove(iIdx);
 }
